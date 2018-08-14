@@ -27,6 +27,7 @@ OS_RELEASE     = "/etc/os-release"
 DEBIAN_VERSION = "/etc/debian_version"
 GENTOO_RELEASE = "/etc/gentoo-release"
 SUSE_RELEASE   = "/etc/SuSE-release"
+ALPINE_RELEASE = "/etc/alpine-release"
 
 def _platform():
     osType, _, _, _, _, _ = platform.uname()
@@ -69,12 +70,14 @@ def _platform():
         if os.path.exists(OS_RELEASE):
             with open(OS_RELEASE, "r") as fd:
                 fileContents = fd.read()
-
                 if fileContents.find("ID=arch") != -1:
                     return ("arch", "arch")
 
                 if fileContents.find("ID=nixos") != -1:
                     return ("nixos", "nixos")
+
+                if fileContents.find("ID=alpine") != -1:
+                    return ("alpine", "alpine")
 
         if os.path.exists(DEBIAN_VERSION):
             return ("debian", "debian")
@@ -179,6 +182,10 @@ def _distro(osType):
             results = re.findall(r'VERSION_ID=\"(.*)\"', contents)
             if len(results) == 1:
                 return results[0]
+    elif osType == "alpine":
+        with open(ALPINE_RELEASE, "r") as fd:
+            content = fd.read()
+            return content.strip()
     elif osType == "windows":
         return "windows%s" % osVersion
 
